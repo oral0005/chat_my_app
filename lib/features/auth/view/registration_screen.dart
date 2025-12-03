@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
+import '../widgets/auth_button.dart';
+import '../widgets/auth_navigation_button.dart';
+import '../widgets/auth_text_field.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -52,9 +55,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       } else if (e.code == 'invalid-email') {
         message = 'Некорректный формат email.';
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -70,57 +75,47 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       appBar: AppBar(
         title: const Text('Регистрация'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AuthTextField(
+                    controller: _nameController,
                     labelText: 'Имя',
-                    border: OutlineInputBorder(),
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
+                  const SizedBox(height: 16),
+                  AuthTextField(
+                    controller: _emailController,
                     labelText: 'Email',
-                    border: OutlineInputBorder(),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  const SizedBox(height: 16),
+                  AuthTextField(
+                    controller: _passwordController,
                     labelText: 'Пароль',
-                    border: OutlineInputBorder(),
+                    obscureText: true,
                   ),
-                ),
-                const SizedBox(height: 24),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                  const SizedBox(height: 24),
+                  AuthButton(
+                    isLoading: _isLoading,
+                    onPressed: _register,
+                    label: 'Зарегистрироваться',
                   ),
-                  onPressed: _register,
-                  child: const Text('Зарегистрироваться'),
-                ),
-                TextButton(
-                  onPressed: _isLoading ? null : () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
-                  child: const Text('Уже есть аккаунт? Войти'),
-                ),
-              ],
+                  AuthNavigationButton(
+                    isLoading: _isLoading,
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                    },
+                    label: 'Уже есть аккаунт? Войти',
+                  ),
+                ],
+              ),
             ),
           ),
         ),

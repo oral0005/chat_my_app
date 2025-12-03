@@ -7,6 +7,8 @@ import 'core/services/firestore_service.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/view/login_screen.dart';
 import 'features/home/view/home_screen.dart';
+import 'package:my_app/core/theme/app_theme.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,13 +32,10 @@ class MyApp extends StatelessWidget {
         create: (context) => AuthBloc(
           authService: RepositoryProvider.of<AuthService>(context),
         ),
-        lazy: false, // <-- Добавьте эту строку
+        lazy: false,
         child: MaterialApp(
           title: 'Flutter Messenger',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
+          theme: AppTheme.lightTheme,
           home: const AuthGate(),
         ),
       ),

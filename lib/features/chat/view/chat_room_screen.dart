@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firestore_service.dart';
 import '../bloc/chat_bloc.dart';
+import '../widgets/message_bubble.dart';
+import '../widgets/message_input.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final UserModel receiver;
@@ -18,6 +20,12 @@ class ChatRoomScreen extends StatefulWidget {
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
 
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
@@ -40,7 +48,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           Expanded(
             child: _buildMessagesList(),
           ),
-          _buildMessageInput(),
+          MessageInput(
+            controller: _messageController,
+            onSendPressed: _sendMessage,
+          ),
         ],
       ),
     );
@@ -59,66 +70,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return ListView(
+        final messages = snapshot.data!.docs;
+
+        return ListView.builder(
+          reverse: true,
           padding: const EdgeInsets.all(8.0),
-          children:
-          snapshot.data!.docs.map((doc) => _buildMessageItem(doc)).toList(),
+          itemCount: messages.length,
+          itemBuilder: (context, index) {
+            final doc = messages[index];
+            final data = doc.data() as Map<String, dynamic>;
+            final isCurrentUser = data['senderId'] == _auth.currentUser!.uid;
+
+            return MessageBubble(
+              message: data['message'],
+              isCurrentUser: isCurrentUser,
+            );
+          },
         );
       },
-    );
-  }
-
-  Widget _buildMessageItem(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    bool isCurrentUser = data['senderId'] == _auth.currentUser!.uid;
-
-    var alignment =
-    isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    return Container(
-      alignment: alignment,
-      child: Column(
-        crossAxisAlignment:
-        isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: isCurrentUser ? Colors.blue[200] : Colors.grey[300],
-            ),
-            child: Text(
-              data['message'],
-              style: const TextStyle(color: Colors.black),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageInput() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Введите сообщение...',
-                border: OutlineInputBorder(),
-              ),
-              textCapitalization: TextCapitalization.sentences,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _sendMessage,
-          ),
-        ],
-      ),
     );
   }
 }

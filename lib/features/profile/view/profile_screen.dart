@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firestore_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
+import '../widgets/logout_button.dart';
+import '../widgets/profile_info_tile.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -28,42 +30,21 @@ class ProfileScreen extends StatelessWidget {
         final userModel = snapshot.data!;
 
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Имя:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                userModel.name,
-                style: const TextStyle(fontSize: 16),
+              ProfileInfoTile(
+                label: 'Имя:',
+                value: userModel.name,
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Email:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                userModel.email,
-                style: const TextStyle(fontSize: 16),
+              ProfileInfoTile(
+                label: 'Email:',
+                value: userModel.email,
               ),
               const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
-                  onPressed: () {
-                    context.read<AuthBloc>().add(AuthLogoutRequested());
-                  },
-                  child: const Text('Выйти'),
-                ),
-              ),
+              const LogoutButton(),
             ],
           ),
         );
