@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/config/firebase_options.dart';
 import 'core/services/auth_service.dart';
+import 'core/services/firestore_service.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/view/login_screen.dart';
 import 'features/home/view/home_screen.dart';
@@ -20,12 +21,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => AuthService(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(create: (context) => AuthService()),
+        RepositoryProvider(create: (context) => FirestoreService()),
+      ],
       child: BlocProvider(
         create: (context) => AuthBloc(
           authService: RepositoryProvider.of<AuthService>(context),
         ),
+        lazy: false, // <-- Добавьте эту строку
         child: MaterialApp(
           title: 'Flutter Messenger',
           theme: ThemeData(
